@@ -1,0 +1,318 @@
+#include "ctype.h"
+
+#define __C_isspace(c)                                                \
+    ((sizeof(c) == sizeof(char))                                      \
+         ? ((((c) == ' ') || (((unsigned char)((c)-9)) <= (13 - 9)))) \
+         : ((((c) == ' ') || (((unsigned int)((c)-9)) <= (13 - 9)))))
+#define __C_isblank(c) (((c) == ' ') || ((c) == '\t'))
+#define __C_isdigit(c)                         \
+    ((sizeof(c) == sizeof(char))               \
+         ? (((unsigned char)((c) - '0')) < 10) \
+         : (((unsigned int)((c) - '0')) < 10))
+#define __C_isxdigit(c)                                                     \
+    (__C_isdigit(c) || ((sizeof(c) == sizeof(char))                         \
+                            ? (((unsigned char)((((c)) | 0x20) - 'a')) < 6) \
+                            : (((unsigned int)((((c)) | 0x20) - 'a')) < 6)))
+#define __C_iscntrl(c)                                      \
+    ((sizeof(c) == sizeof(char))                            \
+         ? ((((unsigned char)(c)) < 0x20) || ((c) == 0x7f)) \
+         : ((((unsigned int)(c)) < 0x20) || ((c) == 0x7f)))
+#define __C_isalpha(c)                                  \
+    ((sizeof(c) == sizeof(char))                        \
+         ? (((unsigned char)(((c) | 0x20) - 'a')) < 26) \
+         : (((unsigned int)(((c) | 0x20) - 'a')) < 26))
+#define __C_isalnum(c) (__C_isalpha(c) || __C_isdigit(c))
+#define __C_isprint(c)                                    \
+    ((sizeof(c) == sizeof(char))                          \
+         ? (((unsigned char)((c)-0x20)) <= (0x7e - 0x20)) \
+         : (((unsigned int)((c)-0x20)) <= (0x7e - 0x20)))
+#define __C_islower(c)                         \
+    ((sizeof(c) == sizeof(char))               \
+         ? (((unsigned char)((c) - 'a')) < 26) \
+         : (((unsigned int)((c) - 'a')) < 26))
+#define __C_isupper(c)                         \
+    ((sizeof(c) == sizeof(char))               \
+         ? (((unsigned char)((c) - 'A')) < 26) \
+         : (((unsigned int)((c) - 'A')) < 26))
+#define __C_ispunct(c)                                                          \
+    ((!__C_isalnum(c)) && ((sizeof(c) == sizeof(char))                          \
+                               ? (((unsigned char)((c)-0x21)) <= (0x7e - 0x21)) \
+                               : (((unsigned int)((c)-0x21)) <= (0x7e - 0x21))))
+#define __C_isgraph(c)                                    \
+    ((sizeof(c) == sizeof(char))                          \
+         ? (((unsigned char)((c)-0x21)) <= (0x7e - 0x21)) \
+         : (((unsigned int)((c)-0x21)) <= (0x7e - 0x21)))
+
+#define __C_tolower(c) (__C_isupper(c) ? ((c) | 0x20) : (c))
+#define __C_toupper(c) (__C_islower(c) ? ((c) ^ 0x20) : (c))
+
+static const __ctype_mask_t __C_ctype_b_data[] = {
+    /*   -1  M-^? */ 0,
+    /*    0  ^@   */ _IScntrl,
+    /*    1  ^A   */ _IScntrl,
+    /*    2  ^B   */ _IScntrl,
+    /*    3  ^C   */ _IScntrl,
+    /*    4  ^D   */ _IScntrl,
+    /*    5  ^E   */ _IScntrl,
+    /*    6  ^F   */ _IScntrl,
+    /*    7  ^G   */ _IScntrl,
+    /*    8  ^H   */ _IScntrl,
+    /*    9  ^I   */ _ISspace | _ISblank | _IScntrl,
+    /*   10  ^J   */ _ISspace | _IScntrl,
+    /*   11  ^K   */ _ISspace | _IScntrl,
+    /*   12  ^L   */ _ISspace | _IScntrl,
+    /*   13  ^M   */ _ISspace | _IScntrl,
+    /*   14  ^N   */ _IScntrl,
+    /*   15  ^O   */ _IScntrl,
+    /*   16  ^P   */ _IScntrl,
+    /*   17  ^Q   */ _IScntrl,
+    /*   18  ^R   */ _IScntrl,
+    /*   19  ^S   */ _IScntrl,
+    /*   20  ^T   */ _IScntrl,
+    /*   21  ^U   */ _IScntrl,
+    /*   22  ^V   */ _IScntrl,
+    /*   23  ^W   */ _IScntrl,
+    /*   24  ^X   */ _IScntrl,
+    /*   25  ^Y   */ _IScntrl,
+    /*   26  ^Z   */ _IScntrl,
+    /*   27  ^[   */ _IScntrl,
+    /*   28  ^\   */ _IScntrl,
+    /*   29  ^]   */ _IScntrl,
+    /*   30  ^^   */ _IScntrl,
+    /*   31  ^_   */ _IScntrl,
+    /*   32       */ _ISspace | _ISprint | _ISblank,
+    /*   33  !    */ _ISprint | _ISgraph | _ISpunct,
+    /*   34  "    */ _ISprint | _ISgraph | _ISpunct,
+    /*   35  #    */ _ISprint | _ISgraph | _ISpunct,
+    /*   36  $    */ _ISprint | _ISgraph | _ISpunct,
+    /*   37  %    */ _ISprint | _ISgraph | _ISpunct,
+    /*   38  &    */ _ISprint | _ISgraph | _ISpunct,
+    /*   39  '    */ _ISprint | _ISgraph | _ISpunct,
+    /*   40  (    */ _ISprint | _ISgraph | _ISpunct,
+    /*   41  )    */ _ISprint | _ISgraph | _ISpunct,
+    /*   42  *    */ _ISprint | _ISgraph | _ISpunct,
+    /*   43  +    */ _ISprint | _ISgraph | _ISpunct,
+    /*   44  ,    */ _ISprint | _ISgraph | _ISpunct,
+    /*   45  -    */ _ISprint | _ISgraph | _ISpunct,
+    /*   46  .    */ _ISprint | _ISgraph | _ISpunct,
+    /*   47  /    */ _ISprint | _ISgraph | _ISpunct,
+    /*   48  0    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   49  1    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   50  2    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   51  3    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   52  4    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   53  5    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   54  6    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   55  7    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   56  8    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   57  9    */ _ISdigit | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   58  :    */ _ISprint | _ISgraph | _ISpunct,
+    /*   59  ;    */ _ISprint | _ISgraph | _ISpunct,
+    /*   60  <    */ _ISprint | _ISgraph | _ISpunct,
+    /*   61  =    */ _ISprint | _ISgraph | _ISpunct,
+    /*   62  >    */ _ISprint | _ISgraph | _ISpunct,
+    /*   63  ?    */ _ISprint | _ISgraph | _ISpunct,
+    /*   64  @    */ _ISprint | _ISgraph | _ISpunct,
+    /*   65  A    */ _ISupper | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   66  B    */ _ISupper | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   67  C    */ _ISupper | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   68  D    */ _ISupper | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   69  E    */ _ISupper | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   70  F    */ _ISupper | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   71  G    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   72  H    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   73  I    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   74  J    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   75  K    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   76  L    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   77  M    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   78  N    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   79  O    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   80  P    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   81  Q    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   82  R    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   83  S    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   84  T    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   85  U    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   86  V    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   87  W    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   88  X    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   89  Y    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   90  Z    */ _ISupper | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*   91  [    */ _ISprint | _ISgraph | _ISpunct,
+    /*   92  \    */ _ISprint | _ISgraph | _ISpunct,
+    /*   93  ]    */ _ISprint | _ISgraph | _ISpunct,
+    /*   94  ^    */ _ISprint | _ISgraph | _ISpunct,
+    /*   95  _    */ _ISprint | _ISgraph | _ISpunct,
+    /*   96  `    */ _ISprint | _ISgraph | _ISpunct,
+    /*   97  a    */ _ISlower | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   98  b    */ _ISlower | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*   99  c    */ _ISlower | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*  100  d    */ _ISlower | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*  101  e    */ _ISlower | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*  102  f    */ _ISlower | _ISalpha | _ISxdigit | _ISprint | _ISgraph | _ISalnum,
+    /*  103  g    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  104  h    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  105  i    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  106  j    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  107  k    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  108  l    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  109  m    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  110  n    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  111  o    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  112  p    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  113  q    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  114  r    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  115  s    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  116  t    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  117  u    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  118  v    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  119  w    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  120  x    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  121  y    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  122  z    */ _ISlower | _ISalpha | _ISprint | _ISgraph | _ISalnum,
+    /*  123  {    */ _ISprint | _ISgraph | _ISpunct,
+    /*  124  |    */ _ISprint | _ISgraph | _ISpunct,
+    /*  125  }    */ _ISprint | _ISgraph | _ISpunct,
+    /*  126  ~    */ _ISprint | _ISgraph | _ISpunct,
+    /*  127  ^?   */ _IScntrl,
+    /*  128  M-^@ */ 0,
+    /*  129  M-^A */ 0,
+    /*  130  M-^B */ 0,
+    /*  131  M-^C */ 0,
+    /*  132  M-^D */ 0,
+    /*  133  M-^E */ 0,
+    /*  134  M-^F */ 0,
+    /*  135  M-^G */ 0,
+    /*  136  M-^H */ 0,
+    /*  137  M-^I */ 0,
+    /*  138  M-^J */ 0,
+    /*  139  M-^K */ 0,
+    /*  140  M-^L */ 0,
+    /*  141  M-^M */ 0,
+    /*  142  M-^N */ 0,
+    /*  143  M-^O */ 0,
+    /*  144  M-^P */ 0,
+    /*  145  M-^Q */ 0,
+    /*  146  M-^R */ 0,
+    /*  147  M-^S */ 0,
+    /*  148  M-^T */ 0,
+    /*  149  M-^U */ 0,
+    /*  150  M-^V */ 0,
+    /*  151  M-^W */ 0,
+    /*  152  M-^X */ 0,
+    /*  153  M-^Y */ 0,
+    /*  154  M-^Z */ 0,
+    /*  155  M-^[ */ 0,
+    /*  156  M-^\ */ 0,
+    /*  157  M-^] */ 0,
+    /*  158  M-^^ */ 0,
+    /*  159  M-^_ */ 0,
+    /*  160  M-   */ 0,
+    /*  161  M-!  */ 0,
+    /*  162  M-"  */ 0,
+    /*  163  M-#  */ 0,
+    /*  164  M-$  */ 0,
+    /*  165  M-%  */ 0,
+    /*  166  M-&  */ 0,
+    /*  167  M-'  */ 0,
+    /*  168  M-(  */ 0,
+    /*  169  M-)  */ 0,
+    /*  170  M-*  */ 0,
+    /*  171  M-+  */ 0,
+    /*  172  M-,  */ 0,
+    /*  173  M--  */ 0,
+    /*  174  M-.  */ 0,
+    /*  175  M-/  */ 0,
+    /*  176  M-0  */ 0,
+    /*  177  M-1  */ 0,
+    /*  178  M-2  */ 0,
+    /*  179  M-3  */ 0,
+    /*  180  M-4  */ 0,
+    /*  181  M-5  */ 0,
+    /*  182  M-6  */ 0,
+    /*  183  M-7  */ 0,
+    /*  184  M-8  */ 0,
+    /*  185  M-9  */ 0,
+    /*  186  M-:  */ 0,
+    /*  187  M-;  */ 0,
+    /*  188  M-<  */ 0,
+    /*  189  M-=  */ 0,
+    /*  190  M->  */ 0,
+    /*  191  M-?  */ 0,
+    /*  192  M-@  */ 0,
+    /*  193  M-A  */ 0,
+    /*  194  M-B  */ 0,
+    /*  195  M-C  */ 0,
+    /*  196  M-D  */ 0,
+    /*  197  M-E  */ 0,
+    /*  198  M-F  */ 0,
+    /*  199  M-G  */ 0,
+    /*  200  M-H  */ 0,
+    /*  201  M-I  */ 0,
+    /*  202  M-J  */ 0,
+    /*  203  M-K  */ 0,
+    /*  204  M-L  */ 0,
+    /*  205  M-M  */ 0,
+    /*  206  M-N  */ 0,
+    /*  207  M-O  */ 0,
+    /*  208  M-P  */ 0,
+    /*  209  M-Q  */ 0,
+    /*  210  M-R  */ 0,
+    /*  211  M-S  */ 0,
+    /*  212  M-T  */ 0,
+    /*  213  M-U  */ 0,
+    /*  214  M-V  */ 0,
+    /*  215  M-W  */ 0,
+    /*  216  M-X  */ 0,
+    /*  217  M-Y  */ 0,
+    /*  218  M-Z  */ 0,
+    /*  219  M-[  */ 0,
+    /*  220  M-\  */ 0,
+    /*  221  M-]  */ 0,
+    /*  222  M-^  */ 0,
+    /*  223  M-_  */ 0,
+    /*  224  M-`  */ 0,
+    /*  225  M-a  */ 0,
+    /*  226  M-b  */ 0,
+    /*  227  M-c  */ 0,
+    /*  228  M-d  */ 0,
+    /*  229  M-e  */ 0,
+    /*  230  M-f  */ 0,
+    /*  231  M-g  */ 0,
+    /*  232  M-h  */ 0,
+    /*  233  M-i  */ 0,
+    /*  234  M-j  */ 0,
+    /*  235  M-k  */ 0,
+    /*  236  M-l  */ 0,
+    /*  237  M-m  */ 0,
+    /*  238  M-n  */ 0,
+    /*  239  M-o  */ 0,
+    /*  240  M-p  */ 0,
+    /*  241  M-q  */ 0,
+    /*  242  M-r  */ 0,
+    /*  243  M-s  */ 0,
+    /*  244  M-t  */ 0,
+    /*  245  M-u  */ 0,
+    /*  246  M-v  */ 0,
+    /*  247  M-w  */ 0,
+    /*  248  M-x  */ 0,
+    /*  249  M-y  */ 0,
+    /*  250  M-z  */ 0,
+    /*  251  M-{  */ 0,
+    /*  252  M-|  */ 0,
+    /*  253  M-}  */ 0,
+    /*  254  M-~  */ 0,
+    /*  255  M-^? */ 0};
+
+const __ctype_mask_t *__ctype_b = __C_ctype_b_data;
+
+int tolower(int c)
+{
+    return __C_tolower(c);
+}
+
+int toupper(int c)
+{
+    return __C_toupper(c);
+}
