@@ -11,12 +11,13 @@ extern "C"
 
     int vsnprintf(char *buf, size_t size, const char *fmt, va_list args);
     int printf(const char *__restrict format, ...);
+    int local_printf(const char *__restrict format, ...);
 
-    void rt_system_heap_init(void *begin_addr, void *end_addr);
-    void *rt_malloc(size_t size);
-    void *rt_realloc(void *rmem, size_t newsize);
-    void *rt_calloc(size_t count, size_t size);
-    void rt_free(void *rmem);
+    void mem_heap_init(void *begin_addr, void *end_addr);
+    void *malloc(size_t size);
+    void *realloc(void *rmem, size_t newsize);
+    void *calloc(size_t count, size_t size);
+    void free(void *rmem);
 #ifdef __cplusplus
 }
 #endif

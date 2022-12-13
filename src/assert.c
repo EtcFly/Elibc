@@ -43,5 +43,5 @@ void __assert(const char *assertion, const char *filename,
     (void)filename;
     (void)linenumber;
     (void)function;
-    printf("%s:%d:%s %s\r\n", filename, linenumber, assertion, function);
+    local_printf("%s:%d:%s %s\r\n", filename, linenumber, assertion, function);
 }

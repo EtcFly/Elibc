@@ -5,16 +5,15 @@
 #define BLEND_COLOR_8B 1  // 支持256色
 #define BLEND_COLOR_24B 2 // 支持24位色
 
-#define LIBC_PRINTF
 #define CONSOLE_COLOR BLEND_COLOR_8B
-
-#include "stdio.h"
-#define libc_printf printf
 
 #ifdef _cplusplus
 extern "C"
 {
 #endif
+
+#include "stdio.h"
+#define LIBC_PRINTF local_printf
 
 #define CSI_START "\033["
 #define CSI_END "\033[0m"
@@ -79,10 +78,10 @@ extern "C"
 #endif
 
 #if 1
-#define START_OUTPUT(color) printf("" CSI_START "" color "")
-#define ASSERT_OUTPUR(fmt, ...) libc_printf(fmt, ##__VA_ARGS__)
-#define END_OUPUT libc_printf(CSI_END)
-#define END_BACKGROUP libc_printf(B_DEF_COLOR)
+#define START_OUTPUT(color) LIBC_PRINTF("" CSI_START "" color "")
+#define ASSERT_OUTPUR(fmt, ...) LIBC_PRINTF(fmt, ##__VA_ARGS__)
+#define END_OUPUT LIBC_PRINTF(CSI_END)
+#define END_BACKGROUP LIBC_PRINTF(B_DEF_COLOR)
 
 #define INFO_OUTPUT(...)        \
     START_OUTPUT(F_B_WHITE);    \
@@ -120,12 +119,10 @@ extern "C"
     ASSERT_OUTPUR(__VA_ARGS__); \
     END_OUPUT
 
-    /*
-        //#define DEBUG_OUTPUT(color, ...)
-    //	START_OUTPUT(F_FMT_COLOR(#color))
-    //	MSG_OUTPUT(##__VA_ARGS__);
-    //	END_OUPUT
-    */
+#define DEBUG_OUTPUT(color, ...)
+    // START_OUTPUT(F_FMT_COLOR(#color))
+    // MSG_OUTPUT(##__VA_ARGS__);
+    // END_OUPUT
 
 #define INFO_RESULT_OUTPUT(str) \
     SPEC_OUTPUT(F_C_GREEN, str)
@@ -150,8 +147,6 @@ extern "C"
         ERR_OUTPUT("[E/LOG] Parameter "); \
         SPEC_OUTPUT(F_C_BLUE, #x);        \
         ERR_OUTPUT(" Check Fail\r\n");    \
-        while (1)                         \
-            ;                             \
     }
 
 #define WARN_ASSERT(x)                     \
@@ -160,7 +155,6 @@ extern "C"
         WARN_OUTPUT("[W/LOG] Parameter "); \
         SPEC_OUTPUT(F_C_BLUE, #x);         \
         WARN_OUTPUT(" Check Fail\r\n");    \
-        return;                            \
     }
 #endif
 
