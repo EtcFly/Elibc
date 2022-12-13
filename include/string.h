@@ -1,5 +1,5 @@
-#ifndef _STRING_H
-#define _STRING_H
+#ifndef _LIBC_STRING_H
+#define _LIBC_STRING_H
 
 #ifdef __cplusplus
 extern "C"
