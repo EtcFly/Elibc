@@ -1,4 +1,4 @@
-#include "ctype.h"
+#include "../inc/_ctype.h"
 
 #define __C_isspace(c)                                                \
     ((sizeof(c) == sizeof(char))                                      \

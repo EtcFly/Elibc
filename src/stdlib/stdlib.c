@@ -1,7 +1,7 @@
 #include "stdlib.h"
 #include "limits.h"
-#include "ctype.h"
-#include "assert.h"
+#include "_ctype.h"
+#include "_assert.h"
 
 int abs(int j)
 {

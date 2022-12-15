@@ -1,5 +1,5 @@
-#ifndef _LIBC_STRING_H
-#define _LIBC_STRING_H
+#ifndef __INTERNAL_LIBC_STRING_H
+#define __INTERNAL_LIBC_STRING_H
 
 #ifdef __cplusplus
 extern "C"
@@ -23,6 +23,7 @@ extern "C"
     size_t strlen(const char *s);
     char *strcat(char *__restrict s1, register const char *__restrict s2);
     int strcmp(register const char *s1, register const char *s2);
+
     int puts(register const char *__restrict s);
 
 #ifdef __cplusplus

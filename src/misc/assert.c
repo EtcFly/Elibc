@@ -1,5 +1,5 @@
-#include "assert.h"
-#include "stdio.h"
+#include "_assert.h"
+#include "_stdio.h"
 
 void result_output(int result)
 {
@@ -43,5 +43,5 @@ void __assert(const char *assertion, const char *filename,
     (void)filename;
     (void)linenumber;
     (void)function;
-    local_printf("%s:%d:%s %s\r\n", filename, linenumber, assertion, function);
+    printf("%s:%d:%s %s\r\n", filename, linenumber, assertion, function);
 }

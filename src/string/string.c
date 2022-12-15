@@ -1,4 +1,5 @@
-#include "string.h"
+#include "_string.h"
+#include "local_console.h"
 
 void *memset(void *s, int c, size_t n)
 {
@@ -104,4 +105,14 @@ int strcmp(register const char *s1, register const char *s2)
         ;
 
     return r;
+}
+
+int puts(register const char *__restrict s)
+{
+    lc_console_callback_t __lc_console_cb = get_active_console();
+    if (NULL != __lc_console_cb)
+    {
+        __lc_console_cb(s);
+    }
+    return strlen(s);
 }
